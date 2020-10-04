@@ -1,5 +1,8 @@
 package devjapa.com.br.resources;
 
+import devjapa.com.br.dto.client.AddClientDTO;
+import devjapa.com.br.dto.client.ClientDTO;
+import devjapa.com.br.dto.client.UpdateClientDTO;
 import devjapa.com.br.entities.Client;
 import devjapa.com.br.repositories.ClientRepository;
 import javax.inject.Inject;
@@ -11,6 +14,7 @@ import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Path("/clients")
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,39 +43,36 @@ public class ClientResource {
 //    }
 
     @GET
-    public List<Client> findAll() {
-        return clientRepository.listAll();
+    public List<ClientDTO> findAll() {
+        return clientRepository.listAll().stream().map(x -> new ClientDTO(x)).collect(Collectors.toList());
     }
 
     @GET
     @Path("/{id}")
-    public Client findById(@PathParam("id") Long id) {
+    public ClientDTO findById(@PathParam("id") Long id) {
         Client client = clientRepository.findById(id);
-        return client;
+        // tratar no service id not found
+        return new ClientDTO(client);
     }
 
     @POST
     @Transactional
-    public Response insert(Client entity) {
-        clientRepository.persist(entity);
+    public Response insert(AddClientDTO dto) {
+        Client client = new Client(dto);
+        clientRepository.persist(client);
         return Response.status(Status.CREATED).build();
     }
 
     @PUT
     @Path("/{id}")
     @Transactional
-    public void update(@PathParam("id") Long id, Client entity) {
+    public void update(@PathParam("id") Long id, UpdateClientDTO dto) {
         Optional<Client> clientOp = clientRepository.findByIdOptional(id);
         if(clientOp.isEmpty()) {
             throw new NotFoundException("Client Not Found");
         }
         Client client = clientOp.get();
-        client.name = entity.name;
-        client.cpf = entity.cpf;
-        client.income = entity.income;
-        client.birthDate = entity.birthDate;
-        client.children = entity.children;
-
+        client.name = dto.name;   
         clientRepository.persist(client);
     }
 
@@ -84,7 +85,6 @@ public class ClientResource {
         clientOp.ifPresentOrElse(clientRepository::delete, () -> {
             throw new NotFoundException("Client not found");
         });
-
     }
 
 }

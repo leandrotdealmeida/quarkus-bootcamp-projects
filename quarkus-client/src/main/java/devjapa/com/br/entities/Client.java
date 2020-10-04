@@ -1,5 +1,6 @@
 package devjapa.com.br.entities;
 
+import devjapa.com.br.dto.client.AddClientDTO;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
@@ -28,5 +29,13 @@ public class Client extends PanacheEntityBase {
         this.income = entity.income;
         this.birthDate = entity.birthDate;
         this.children = entity.children;
+    }
+
+    public Client(AddClientDTO dto) {
+        this.name = dto.name;
+        this.cpf = dto.cpf;
+        this.income = dto.income;
+        this.birthDate = dto.birthDate;
+        this.children = dto.children;
     }
 }
