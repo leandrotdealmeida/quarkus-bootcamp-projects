@@ -5,6 +5,9 @@ import devjapa.com.br.dto.client.ClientDTO;
 import devjapa.com.br.dto.client.UpdateClientDTO;
 import devjapa.com.br.entities.Client;
 import devjapa.com.br.repositories.ClientRepository;
+import devjapa.com.br.services.ClientService;
+import devjapa.com.br.services.ClienteServiceImpl;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
@@ -28,13 +31,13 @@ public class ClientResource {
     }
 
     @Inject
-    ClientRepository clientRepository;
+    ClientService clientService;
 
     @GET
     @Path("/health")
     @Produces(MediaType.TEXT_PLAIN)
     public String health() {
-        return "UP";
+        return clientService.health();
     }
 
 //    @GET
@@ -44,22 +47,20 @@ public class ClientResource {
 
     @GET
     public List<ClientDTO> findAll() {
-        return clientRepository.listAll().stream().map(x -> new ClientDTO(x)).collect(Collectors.toList());
+        return clientService.findAll();
     }
 
     @GET
     @Path("/{id}")
     public ClientDTO findById(@PathParam("id") Long id) {
-        Client client = clientRepository.findById(id);
         // tratar no service id not found
-        return new ClientDTO(client);
+        return clientService.findById(id);
     }
 
     @POST
     @Transactional
     public Response insert(AddClientDTO dto) {
-        Client client = new Client(dto);
-        clientRepository.persist(client);
+        clientService.insert(dto);
         return Response.status(Status.CREATED).build();
     }
 
@@ -67,24 +68,14 @@ public class ClientResource {
     @Path("/{id}")
     @Transactional
     public void update(@PathParam("id") Long id, UpdateClientDTO dto) {
-        Optional<Client> clientOp = clientRepository.findByIdOptional(id);
-        if(clientOp.isEmpty()) {
-            throw new NotFoundException("Client Not Found");
-        }
-        Client client = clientOp.get();
-        client.name = dto.name;   
-        clientRepository.persist(client);
+        clientService.update(id, dto);
     }
 
     @DELETE
     @Path("/{id}")
     @Transactional
     public void delete(@PathParam("id") Long id) {
-        Optional<Client> clientOp = clientRepository.findByIdOptional(id);
-
-        clientOp.ifPresentOrElse(clientRepository::delete, () -> {
-            throw new NotFoundException("Client not found");
-        });
+        clientService.delete(id);
     }
 
 }
