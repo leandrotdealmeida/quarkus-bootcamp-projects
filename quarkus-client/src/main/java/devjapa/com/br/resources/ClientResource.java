@@ -2,15 +2,15 @@ package devjapa.com.br.resources;
 
 import devjapa.com.br.entities.Client;
 import devjapa.com.br.repositories.ClientRepository;
-import io.netty.util.internal.StringUtil;
-
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Path("/clients")
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,32 +33,58 @@ public class ClientResource {
         return "UP";
     }
 
+//    @GET
+//    public Response findAll() {
+//        return Response.status(200).entity(clientRepository.listAll()).build();
+//    }
+
     @GET
-    public Collection<Client> findAll() {
+    public List<Client> findAll() {
         return clientRepository.listAll();
     }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public String insert(String client) {
-        clients.add(client);
+    @GET
+    @Path("/{id}")
+    public Client findById(@PathParam("id") Long id) {
+        Client client = clientRepository.findById(id);
         return client;
+    }
+
+    @POST
+    @Transactional
+    public Response insert(Client entity) {
+        clientRepository.persist(entity);
+        return Response.status(Status.CREATED).build();
     }
 
     @PUT
     @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String update(@PathParam("id") Integer index, String client) {
-        clients.remove((int) index);
-        clients.add(index, client);
-        return client;
+    @Transactional
+    public void update(@PathParam("id") Long id, Client entity) {
+        Optional<Client> clientOp = clientRepository.findByIdOptional(id);
+        if(clientOp.isEmpty()) {
+            throw new NotFoundException("Client Not Found");
+        }
+        Client client = clientOp.get();
+        client.name = entity.name;
+        client.cpf = entity.cpf;
+        client.income = entity.income;
+        client.birthDate = entity.birthDate;
+        client.children = entity.children;
+
+        clientRepository.persist(client);
     }
 
     @DELETE
     @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String delete(@PathParam("id") Integer index) {
-        return clients.remove((int) index);
+    @Transactional
+    public void delete(@PathParam("id") Long id) {
+        Optional<Client> clientOp = clientRepository.findByIdOptional(id);
+
+        clientOp.ifPresentOrElse(clientRepository::delete, () -> {
+            throw new NotFoundException("Client not found");
+        });
+
     }
 
 }

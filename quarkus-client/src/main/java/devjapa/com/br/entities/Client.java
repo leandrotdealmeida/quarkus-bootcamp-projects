@@ -13,9 +13,20 @@ public class Client extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
     public String name;
+    public String cpf;
     public Double income;
     @Column(name = "birth_date", columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     public Instant birthDate;
     public Integer children;
 
+    public Client() {
+    }
+
+    public Client(Client entity) {
+        this.name = entity.name;
+        this.cpf = entity.cpf;
+        this.income = entity.income;
+        this.birthDate = entity.birthDate;
+        this.children = entity.children;
+    }
 }
