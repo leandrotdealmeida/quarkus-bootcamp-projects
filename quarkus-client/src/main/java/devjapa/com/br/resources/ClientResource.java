@@ -1,13 +1,20 @@
-package devjapa.com.br;
+package devjapa.com.br.resources;
 
+import devjapa.com.br.entities.Client;
+import devjapa.com.br.repositories.ClientRepository;
 import io.netty.util.internal.StringUtil;
 
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Path("/clients")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class ClientResource {
 
     private static ArrayList<String> clients = new ArrayList<>();
@@ -15,6 +22,9 @@ public class ClientResource {
     static {
         clients.add("DevJapa 0");
     }
+
+    @Inject
+    ClientRepository clientRepository;
 
     @GET
     @Path("/health")
@@ -24,9 +34,8 @@ public class ClientResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String findAll() {
-        return StringUtil.join(",", clients).toString();
+    public Collection<Client> findAll() {
+        return clientRepository.listAll();
     }
 
     @POST
