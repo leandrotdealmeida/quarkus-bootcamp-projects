@@ -12,10 +12,10 @@ public class ClientResourceTest {
     @Test
     public void testHelloEndpoint() {
         given()
-          .when().get("/C:/Program Files/Git/clients")
+          .when().get("/clients")
           .then()
              .statusCode(200)
-             .body(is("hello"));
+             .body(is("DevJapa 0"));
     }
 
 }

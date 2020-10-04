@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  postgres_cadastro:
+    container_name: postgres_client
+    image: "postgres"
+    environment:
+      POSTGRES_USER: client
+      POSTGRES_PASSWORD: client
+    ports:
+      - 5432:5432 
